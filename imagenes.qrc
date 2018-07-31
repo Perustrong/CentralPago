@@ -1,0 +1,117 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Iconos/Tocar.png</file>
+        <file>Iconos/Instrucciones.png</file>
+        <file>Iconos/Precio.png</file>
+        <file>Iconos/icono lavadora (AZUL).png</file>
+        <file>Iconos/icono lavadora.png</file>
+        <file>Iconos/4 Programas de lavado.jpg</file>
+        <file>Iconos/6 Programas de secado.jpg</file>
+        <file>Iconos/5 Opciones extra lavado.jpg</file>
+        <file>Iconos/8 Normas de uso de equipos.jpg</file>
+        <file>Iconos/9 Compromiso con AVOI.jpg</file>
+        <file>Iconos/7 Normativa de lavandería.jpg</file>
+        <file>Iconos/3 Tarjeta de descuento.jpg</file>
+        <file>Iconos/2 Lista de precio - Especial.jpg</file>
+        <file>Iconos/1 Lista de precio - Estándar.jpg</file>
+        <file>Iconos/home.png</file>
+        <file>Iconos/Cargar saldo.png</file>
+        <file>Iconos/Tarjeta.png</file>
+        <file>Iconos/Secadora.png</file>
+        <file>Iconos/Secadora (VERDE).png</file>
+        <file>Iconos/Secadora (ROJO).png</file>
+        <file>Iconos/icono lavadora (ROJO).png</file>
+        <file>Iconos/icono lavadora (VERDE).png</file>
+        <file>Iconos/Atras.png</file>
+        <file>Iconos/Secadora (AZUL).png</file>
+        <file>Iconos/aceptar (VERDE).png</file>
+        <file>Iconos/aceptar.png</file>
+        <file>Iconos/Muy Sucio.png</file>
+        <file>Iconos/Sucio (AZUL).png</file>
+        <file>Iconos/Delicado (AZUL).png</file>
+        <file>Iconos/Muy Sucio (AZUL).png</file>
+        <file>Iconos/Normal (AZUL).png</file>
+        <file>Iconos/Normal.png</file>
+        <file>Iconos/Delicado.png</file>
+        <file>Iconos/Sucio.png</file>
+        <file>Iconos/Extra Lavado (AZUL).png</file>
+        <file>Iconos/Extra Centrifugado (AZUL).png</file>
+        <file>Iconos/Extra Aclarado (AZUL).png</file>
+        <file>Iconos/Extra Aclarado.png</file>
+        <file>Iconos/Extra Centrifugado.png</file>
+        <file>Iconos/Extra Lavado.png</file>
+        <file>Iconos/material/banderas/.DS_Store</file>
+        <file>Iconos/material/banderas/bandera_01.png</file>
+        <file>Iconos/material/banderas/bandera_02.png</file>
+        <file>Iconos/material/banderas/bandera_03.png</file>
+        <file>Iconos/material/banderas/bandera_04.png</file>
+        <file>Iconos/material/fondos/fondo_inicio.jpg</file>
+        <file>Iconos/material/fondos/fondo_inicio_Reescalado.jpg</file>
+        <file>Iconos/material/fondos/fondo_lavar01.jpg</file>
+        <file>Iconos/material/fondos/fondo_lavar02.jpg</file>
+        <file>Iconos/material/fondos/fondo_pagar.jpg</file>
+        <file>Iconos/material/fondos/fondo_secar.jpg</file>
+        <file>Iconos/material/iconos/icono_cargarsaldo.png</file>
+        <file>Iconos/material/iconos/icono_comprartarjeta.png</file>
+        <file>Iconos/material/iconos/icono_delicado.png</file>
+        <file>Iconos/material/iconos/icono_extraaclarado.png</file>
+        <file>Iconos/material/iconos/icono_extracentrifugado.png</file>
+        <file>Iconos/material/iconos/icono_extralavado.png</file>
+        <file>Iconos/material/iconos/icono_instrucciones.png</file>
+        <file>Iconos/material/iconos/icono_lavar.png</file>
+        <file>Iconos/material/iconos/icono_lavar_tamañokg01.png</file>
+        <file>Iconos/material/iconos/icono_lavar_tamañokg02.png</file>
+        <file>Iconos/material/iconos/icono_lavar_tamañokg03.png</file>
+        <file>Iconos/material/iconos/icono_lavar_tamañokg04.png</file>
+        <file>Iconos/material/iconos/icono_listadodeprecios.png</file>
+        <file>Iconos/material/iconos/icono_muysucio.png</file>
+        <file>Iconos/material/iconos/icono_normal.png</file>
+        <file>Iconos/material/iconos/icono_secadoratamañokg01.png</file>
+        <file>Iconos/material/iconos/icono_secadoratamañokg02.png</file>
+        <file>Iconos/material/iconos/icono_secadoratamañokg03.png</file>
+        <file>Iconos/material/iconos/icono_secar.png</file>
+        <file>Iconos/material/iconos/icono_sucio.png</file>
+        <file>Iconos/material/iconos/icono_temperaturadelicado.png</file>
+        <file>Iconos/material/iconos/icono_temperaturamuycaliente.png</file>
+        <file>Iconos/material/iconos/icono_temperaturanormal.png</file>
+        <file>Iconos/material/iconos/icono_tiemposecado+.png</file>
+        <file>Iconos/material/iconos/icono_tiemposecado-.png</file>
+        <file>Iconos/material/iconos/icono_tiemposecado.png</file>
+        <file>Iconos/material/rectangulos y material/flecha_atrás.png</file>
+        <file>Iconos/material/rectangulos y material/flecha_atrás_azul.png</file>
+        <file>Iconos/material/rectangulos y material/flecha_delante.png</file>
+        <file>Iconos/material/rectangulos y material/flecha_delante_azul.png</file>
+        <file>Iconos/material/rectangulos y material/rectangulo_iconos.png</file>
+        <file>Iconos/material/rectangulos y material/rectangulo_logo-empresa.png</file>
+        <file>Iconos/material/rectangulos y material/rectangulo_pagar.png</file>
+        <file>Iconos/material/rectangulos y material/rectangulo_resumen-datos.png</file>
+        <file>Iconos/material/fondos/fondo_lavar01-Reescalado.jpg</file>
+        <file>Iconos/material/fondos/fondo_lavar02_Reescalado.jpg</file>
+        <file>Iconos/material/fondos/fondo_pagar_Reescalado.jpg</file>
+        <file>Iconos/material/iconos/icono_secadoratamañokg00.png</file>
+        <file>Iconos/material/fondos/fondo_secar_Reescalado.jpg</file>
+        <file>Iconos/material/rectangulos y material/rectangulo_iconos_Reescalado.png</file>
+        <file>Iconos/material/iconos/icono_extraaclarado_ON.png</file>
+        <file>Iconos/material/iconos/icono_extracentrifugado_ON.png</file>
+        <file>Iconos/material/iconos/icono_extralavado_ON.png</file>
+        <file>Iconos/Usuario.png</file>
+        <file>Iconos/material/rectangulos y material/rectangulo_fondo.png</file>
+        <file>Iconos/material/iconos/icono-ajustes.png</file>
+        <file>Iconos/material/iconos/icono_lavar_tamañokg01 - Rojo.png</file>
+        <file>Iconos/material/iconos/icono_lavar_tamañokg01 - Verde.png</file>
+        <file>Iconos/material/iconos/icono_lavar_tamañokg02 - Rojo.png</file>
+        <file>Iconos/material/iconos/icono_lavar_tamañokg02 - Verde.png</file>
+        <file>Iconos/material/iconos/icono_lavar_tamañokg03 - Rojo.png</file>
+        <file>Iconos/material/iconos/icono_lavar_tamañokg03 - Verde.png</file>
+        <file>Iconos/material/iconos/icono_lavar_tamañokg04 - Rojo.png</file>
+        <file>Iconos/material/iconos/icono_lavar_tamañokg04 - Verde.png</file>
+        <file>Iconos/material/iconos/icono_secadoratamañokg00 - Rojo.png</file>
+        <file>Iconos/material/iconos/icono_secadoratamañokg00 - Verde.png</file>
+        <file>Iconos/material/iconos/icono_secadoratamañokg01 - Rojo.png</file>
+        <file>Iconos/material/iconos/icono_secadoratamañokg01 - Verde.png</file>
+        <file>Iconos/material/iconos/icono_secadoratamañokg02 - Verde.png</file>
+        <file>Iconos/material/iconos/icono_secadoratamañokg02 -Rojo.png</file>
+        <file>Iconos/material/iconos/icono_secadoratamañokg03 - Rojo.png</file>
+        <file>Iconos/material/iconos/icono_secadoratamañokg03 - Verde.png</file>
+    </qresource>
+</RCC>
