@@ -17,12 +17,14 @@ public:
     c_MySQL();
 
 
+
     bool ConectarServidor();
     bool NuevoCliente(QString nombre, QString apellidos, QString saldo, QString CardID);
     float SaldoCliente(QString NumeroTarjeta, QString ID);
     bool RecargaTarjeta(QString ID,float cantidad);
     QString IDNuevoCliente();
     bool NuevoSaldo(QString ID, float saldo);
+    QSqlQuery ConsultaUsuario(QString ID);
 
 
 

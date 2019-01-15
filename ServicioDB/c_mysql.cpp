@@ -383,3 +383,86 @@ bool c_MySQL::RecargaTarjeta(QString ID, float cantidad)
 
 
 }
+
+QSqlQuery c_MySQL::ConsultaUsuario(QString ID)
+{
+
+
+    QSqlQuery query(db);
+    //QSqlQueryModel SqlModel;
+
+    if(db.isOpen())
+    {
+        qDebug() << "La conexion esta establecida";
+
+      //  QString insertvalues ="SELECT Saldo FROM base_datos_cp.clientes WHERE Numero_de_tarjeta = (NumeroTarjeta)VALUES(:NumeroTarjeta) AND ID =(ID)VALUES(:ID)";
+        QString insertvalues ="SELECT * FROM base_datos_cp.clientes WHERE ID =:ID";
+        query.prepare(insertvalues);
+        query.bindValue(":ID",ID);
+        query.exec();
+
+        query.first();
+
+        qDebug() <<query.lastError().text();
+
+        if(query.lastError().isValid())
+        {
+            cout << "Error el leer la tabla por ID"<<endl;
+           // SqlModel.setQuery(query);
+
+            return query;
+
+        }
+        else
+        {
+            //SqlModel.setQuery(query);
+
+            return query;
+        }
+
+    }
+    else
+    {
+        bool conectado;
+        conectado = ConectarServidor();
+        if(conectado == false)
+        {
+            cout << "Imposible realizar la conexión con MySQL"<<endl;
+
+        }
+        else
+        {
+            qDebug() << "La conexion esta establecida";
+
+          //  QString insertvalues ="SELECT Saldo FROM base_datos_cp.clientes WHERE Numero_de_tarjeta = (NumeroTarjeta)VALUES(:NumeroTarjeta) AND ID =(ID)VALUES(:ID)";
+            QString insertvalues ="SELECT * FROM base_datos_cp.clientes WHERE ID =:ID";
+            query.prepare(insertvalues);
+            query.bindValue(":ID",ID);
+            query.exec();
+
+            query.first();
+
+            qDebug() <<query.lastError().text();
+
+            if(query.lastError().isValid())
+            {
+                cout << "Error el leer la tabla por ID"<<endl;
+               // SqlModel.setQuery(query);
+
+                return query;
+
+            }
+            else
+            {
+                //SqlModel.setQuery(query);
+
+                return query;
+            }
+        }
+
+    }
+     query.finish();
+
+}
+
+

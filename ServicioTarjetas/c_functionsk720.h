@@ -39,7 +39,8 @@ public:
 
     c_flags_K720 TestSensor();
     HANDLE ConnectCOM();
-    float LeerTarjeta();
+    float LeerSaldoTarjeta();
+    QString LeerIDTarjeta();
     QString CrearTarjeta(QString Nombre, QString Apellidos, QString ID);
 private:
     HANDLE hComPortInside;

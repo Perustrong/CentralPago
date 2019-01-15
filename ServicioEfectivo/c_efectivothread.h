@@ -13,7 +13,7 @@ public:
     void Stop();
     void Enable();
     void run();
-    void DevolucionMonedas(float number);
+  //  void DevolucionMonedas(float number);
     PayLink SistemaMonedas;
 
 signals:

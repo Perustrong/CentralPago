@@ -38,6 +38,7 @@ void c_EfectivoThread::run()
     while (true)
     {
         Pagado = SistemaMonedas.PagoMoneda();
+        cout <<"[c_EfectivoThread] ****************************emit LecturaMoneda - Pagado:"<<Pagado<<endl;
 
         emit LecturaMoneda(Pagado);
         Sleep(10);

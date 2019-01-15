@@ -26,7 +26,7 @@
 #include "ServicioEfectivo/c_efectivothread2.h"
 #include "ServicioDB/c_mysql.h"
 #include <ServicioTarjetas/c_tarjetathread.h>
-#include <ServicioImpresion/SSPInclude.h>
+//#include <ServicioImpresion/SSPInclude.h>
 #include <ServicioImpresion/c_couponprinter.h>
 #include <ServicioImpresion/c_couponprinterthread.h>
 #include <ServicioMaquinas/c_lecturamaquinas.h>
@@ -161,6 +161,8 @@ private slots:
     void on_B13_Lavadora05_clicked();
 
     void on_B14_Lavadora06_clicked();
+
+    void ventana0();
 
     void ventana4();
 
@@ -363,7 +365,10 @@ private slots:
     void on_B04_Back_26_clicked();
 
 
-   // void onPuertaCerradaLav();
+    void onInhabilitaLavadora(unsigned char Lav);
+    void onInhabilitaSecadora(unsigned char Sec);
+
+    void ActivarHilosTest();
 
   //  void on_stackedWidget_currentChanged(int arg1);
 

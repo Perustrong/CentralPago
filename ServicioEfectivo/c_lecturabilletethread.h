@@ -19,7 +19,6 @@ public:
     float LeerPuertoCom();
     float InterpretaMensaje(unsigned char MensajeAux[]);
     void run();
-    bool Stop;
     HANDLE hComPort=0;
 
 signals:

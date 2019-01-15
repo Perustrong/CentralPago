@@ -107,7 +107,7 @@ void c_EfectivoThread2::run()
     if (Sincro == false)
     {
         Sincro = SistemaBilletes.SyncBilletes();
-
+        
         if (Sincro == false)
         {
             cout <<"Imposible sincronizar con billetero";

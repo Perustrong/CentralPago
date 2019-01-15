@@ -12,7 +12,7 @@ HANDLE c_FunctionsK720::ConnectCOM()
         if(hComPort!=0)
         {
 
-            cout << "Conexión COM OK!"<<endl;
+            cout << "Conexion COM OK!"<<endl;
             this->flagsComInside->flag_status_com(true);
             hComPortInside = hComPort;
             cout<<"HANDLE COM en la conexión"<<hComPort<<endl;
@@ -386,7 +386,371 @@ void c_FunctionsK720::ExpulsarTarjeta()
 
 }
 
-float c_FunctionsK720::LeerTarjeta()
+QString c_FunctionsK720::LeerIDTarjeta()
+{
+
+    int Check;
+    int sizeID = 5;
+    BYTE CardID[5];
+    QString numCard = NULL;
+    BYTE SectorAddr,BlockAddr;
+    BYTE _BlockRecive[20];
+    char RecordInfo[300];
+    BYTE KEY[6] ={0xff,0xff,0xff,0xff,0xff,0xff};
+    BYTE tempByte;
+    memset(_BlockRecive, 0, sizeof(_BlockRecive));
+    time_t EndWait;
+    time_t Start = time(0);
+    time_t Seconds = 20;
+    bool TimeOut = true;
+    char MacAddr = this->getMacAddr();
+    UltimaID = "";
+    UltimoNumCard = "";
+
+    if(*flagsComInside->estado_com()==false)
+    {
+        HANDLE hComPortAux;
+        hComPortAux = ConnectCOM();
+        if(hComPortAux==0)
+        {
+            cout<<"Imposible realizar conexión con Dispensador"<<endl;
+        }
+        else
+        {
+
+            TestSensor();
+         //   cout<<" Sensor2 y Sensor3 = "<< *getc_flags_K720()->sensor2_com() << *getc_flags_K720()->sensor3_com()<<endl;
+           if(*getc_flags_K720()->sensor2_com() == true || *getc_flags_K720()->sensor3_com() == true)
+           {
+               Check = K720_SendCmd(getHANDLE(),MacAddr, "FC7", 3, RecordInfo);
+               Sleep(200);
+               Check = K720_SendCmd(getHANDLE(),MacAddr, "CP", 2, RecordInfo);
+               //Sleep(33);
+           }
+
+            //Sleep(300);
+           EnableMouth();
+           Start = time(0);
+           EndWait = Start + Seconds;
+
+           //Endtime = start time + tiempo extra BUSCAR!!!
+
+            while (Start < EndWait)
+            {
+                if(*getc_flags_K720()->sensor2_com() == true && *getc_flags_K720()->sensor3_com() == true)
+                {
+                    TimeOut = false;
+                    break;
+                }
+                TestSensor();
+                Start = time(0);
+
+            }
+            if(TimeOut==true)
+            {
+                cout<<"TimeOut! Tiempo de espera finalizado";
+                Check = K720_CommClose(hComPortInside);
+                cout << "Check ComClose" << Check << endl;
+                flagsComInside->flag_status_com(false);
+                return "fail";
+            }
+            else
+            {
+                Check = K720_SendCmd(getHANDLE(),MacAddr, "FC7", 3, RecordInfo);
+                Sleep(1000);
+
+                Check = K720_S50DetectCard(getHANDLE(), MacAddr,RecordInfo);
+
+                if(Check==0)
+                {
+                    Check = K720_S50GetCardID(getHANDLE(),MacAddr,CardID,RecordInfo);
+                    cout<<"Check = "<<Check<<endl<<"Card ID = "<<CardID<<endl;
+                    for (int i =0;i<sizeID; i++)
+                    {
+                        printf("CardID %x", CardID[i]);
+                    }
+                    numCard = BYTEStringtoQString(CardID,sizeID);
+
+                    cout << "numCard convertido QString = "<<numCard.toStdString()<<endl;
+
+                    if(Check == 0)
+                    {
+                        SectorAddr = 01;
+                        BlockAddr = 00;
+
+                        if(Check==0)
+                        {
+
+                             Check = K720_S50LoadSecKey(getHANDLE(),MacAddr,SectorAddr, 0x30,KEY,RecordInfo);
+                             cout<<"Check LOADSECURITY = "<<Check<<endl;
+                            if(Check == 0)
+                            {
+
+                                Check = K720_S50ReadBlock(getHANDLE(), MacAddr, SectorAddr,BlockAddr,_BlockRecive,RecordInfo);
+
+                                cout<<"Check ReadData = "<<endl<<"Record Info Lectura" <<RecordInfo<<endl<<"Tamaño del bloque recibido"<<sizeof(_BlockRecive)<< endl;
+                                cout << "BlockRecibe1 = "<<_BlockRecive<<endl;
+                                printf("CheckRead1 %x",Check);
+
+
+
+                                if(Check ==0)
+                                {
+                                    if(_BlockRecive[0]=='I')
+                                    {
+
+                                        if(_BlockRecive[1]=='D')
+                                        {
+                                            if(_BlockRecive[2] == '=')
+                                            {
+                                                int SizeID =(_BlockRecive[3]-'0');
+                                                //unsigned char Mensaje[SizeID];
+                                                QString ID = NULL;
+                                                ID.resize(SizeID);
+
+                                                cout<<"Tamaño recogido en la tarjeta = "<<_BlockRecive[3]<<endl<<SizeID<<endl;
+                                                for(int i = 0;i<SizeID;i++)
+                                                {
+                                                    ID[i]=_BlockRecive[i+4];
+                                                }
+
+                                               // ID = BYTEStringtoQString(Mensaje, SizeID);
+                                                float saldofloat = BaseDatos.SaldoCliente(numCard,ID);
+                                                cout<<"saldofloat = " <<saldofloat<<endl;
+                                                saldofloat = saldofloat*100;
+
+                                                UltimaID = ID;
+                                                UltimoNumCard = numCard;
+
+                                               return ID;
+
+                                           }
+                                       }
+                                   }
+
+                                }
+
+                                ExpulsarTarjeta();
+
+
+                                Check = K720_CommClose(hComPortInside);
+                                cout << "Check ComClose" << Check << endl;
+                                flagsComInside->flag_status_com(false);
+                                return "fail";
+
+                            }
+
+                            else
+                            {
+
+                                ExpulsarTarjeta();
+
+                                Check = K720_CommClose(hComPortInside);
+                                cout << "Check ComClose" << Check << endl;
+                                flagsComInside->flag_status_com(false);
+                                return "fail";
+                            }
+                        }
+                        else
+                        {
+                            ExpulsarTarjeta();
+                            Check = K720_CommClose(hComPortInside);
+                            cout << "Check ComClose" << Check << endl;
+                            flagsComInside->flag_status_com(false);
+                            return "fail";
+                        }
+                    }
+                    else
+                    {
+                        ExpulsarTarjeta();
+                        Check = K720_CommClose(hComPortInside);
+                        cout << "Check ComClose" << Check << endl;
+                        flagsComInside->flag_status_com(false);
+                        return "fail";
+                    }
+                }
+                else
+                {
+                    ExpulsarTarjeta();
+                    Check = K720_CommClose(hComPortInside);
+                    cout << "Check ComClose" << Check << endl;
+                    flagsComInside->flag_status_com(false);
+                    return "fail";
+                }
+            }
+            ExpulsarTarjeta();
+            Check = K720_CommClose(hComPortInside);
+            cout << "Check ComClose" << Check << endl;
+            flagsComInside->flag_status_com(false);
+            return "fail";
+        }
+
+
+    }
+
+    else
+    {
+        TestSensor();
+        cout<<" Sensor2 y Sensor3 = "<< *getc_flags_K720()->sensor2_com() << *getc_flags_K720()->sensor3_com()<<endl;
+        if(*getc_flags_K720()->sensor2_com() == true || *getc_flags_K720()->sensor3_com() == true)
+        {
+           Check = K720_SendCmd(getHANDLE(),MacAddr, "FC7", 3, RecordInfo);
+           Sleep(200);
+           Check = K720_SendCmd(getHANDLE(),MacAddr, "CP", 2, RecordInfo);
+          // Sleep(33);
+        }
+        EnableMouth();
+       // Sleep(1000);
+        while (Start < EndWait)
+        {
+            if(*getc_flags_K720()->sensor2_com() == true && *getc_flags_K720()->sensor3_com() == true)
+            {
+                TimeOut = false;
+                break;
+            }
+            TestSensor();
+            Start = time(0);
+
+        }
+        if(TimeOut==true)
+        {
+            cout<<"TimeOut! Tiempo de espera finalizado";
+            Check = K720_CommClose(hComPortInside);
+            cout << "Check ComClose" << Check << endl;
+            flagsComInside->flag_status_com(false);
+            return "fail";
+        }
+        else
+        {
+            Check = K720_SendCmd(getHANDLE(),MacAddr, "FC7", 3, RecordInfo);
+            Sleep(1000);
+            Check = K720_S50DetectCard(getHANDLE(), MacAddr,RecordInfo);
+
+            if(Check==0)
+            {
+                Check = K720_S50GetCardID(getHANDLE(),MacAddr,CardID,RecordInfo);
+                cout<<"Check = "<<Check<<endl<<"Card ID = "<<CardID<<endl;
+                for (int i =0;i<sizeID; i++)
+                {
+                    printf("CardID %x", CardID[i]);
+                }
+                numCard = BYTEStringtoQString(CardID,sizeID);
+
+                cout << "numCard convertido QString = "<<numCard.toStdString()<<endl;
+
+                if(Check == 0)
+                {
+                    SectorAddr = 01;
+                    BlockAddr = 00;
+
+                    if(Check==0)
+                    {
+
+                         Check = K720_S50LoadSecKey(getHANDLE(),MacAddr,SectorAddr, 0x30,KEY,RecordInfo);
+                         cout<<"Check LOADSECURITY = "<<Check<<endl;
+                        if(Check == 0)
+                        {
+                            QString BloqueRecibido;
+                            Check = K720_S50ReadBlock(getHANDLE(), MacAddr, SectorAddr,BlockAddr,_BlockRecive,RecordInfo);
+
+                            cout<<"Check ReadData = "<<endl<<"Record Info Lectura" <<RecordInfo<<endl<<"Tamaño del bloque recibido"<<sizeof(_BlockRecive)<< endl;
+                            cout << "BlockRecibe1 = "<<_BlockRecive<<endl;
+                            printf("CheckRead1 %x",Check);
+
+
+
+                            if(Check ==0)
+                            {
+                               if(_BlockRecive[0]=='I')
+                               {
+
+                                   if(_BlockRecive[1]=='D')
+                                   {
+                                       if(_BlockRecive[2] == '=')
+                                       {
+                                           int SizeID =(_BlockRecive[3]-'0');
+                                           //unsigned char Mensaje[SizeID];
+                                           QString ID = NULL;
+                                           ID.resize(SizeID);
+
+
+                                           cout<<"Tamaño recogido en la tarjeta = "<<_BlockRecive[3]<<endl<<SizeID<<endl;
+                                           for(int i = 0;i<SizeID;i++)
+                                           {
+                                               ID[i]=_BlockRecive[i+4];
+                                           }
+                                           UltimaID = ID;
+                                           UltimoNumCard = numCard;
+
+                                           return ID;
+
+                                       }
+                                   }
+                               }
+
+                            }
+
+                            ExpulsarTarjeta();
+
+
+                            Check = K720_CommClose(hComPortInside);
+                            cout << "Check ComClose" << Check << endl;
+                            flagsComInside->flag_status_com(false);
+                            return "fail";
+
+                        }
+
+                        else
+                        {
+
+                            ExpulsarTarjeta();
+
+                            Check = K720_CommClose(hComPortInside);
+                            cout << "Check ComClose" << Check << endl;
+                            flagsComInside->flag_status_com(false);
+                            return "fail";
+                        }
+                    }
+                    else
+                    {
+                        ExpulsarTarjeta();
+                        Check = K720_CommClose(hComPortInside);
+                        cout << "Check ComClose" << Check << endl;
+                        flagsComInside->flag_status_com(false);
+                        return "fail";
+                    }
+                }
+                else
+                {
+                    ExpulsarTarjeta();
+                    Check = K720_CommClose(hComPortInside);
+                    cout << "Check ComClose" << Check << endl;
+                    flagsComInside->flag_status_com(false);
+                    return "fail";
+                }
+            }
+            else
+            {
+                ExpulsarTarjeta();
+                Check = K720_CommClose(hComPortInside);
+                cout << "Check ComClose" << Check << endl;
+                flagsComInside->flag_status_com(false);
+                return "fail";
+            }
+        }
+        ExpulsarTarjeta();
+        Check = K720_CommClose(hComPortInside);
+        cout << "Check ComClose" << Check << endl;
+        flagsComInside->flag_status_com(false);
+        return "fail";
+        }
+    return "fail";
+
+}
+
+
+
+float c_FunctionsK720::LeerSaldoTarjeta()
 {
     int Check;
     int sizeID = 5;
@@ -850,7 +1214,7 @@ QString c_FunctionsK720::CrearTarjeta(QString Nombre, QString Apellidos, QString
     char RecordInfo[300];
     char MacAddr = this->getMacAddr();
     BYTE KEY[6] ={0xff,0xff,0xff,0xff,0xff,0xff};
-    BYTE tempByte;
+    //BYTE tempByte;
     memset(_BlockRecive, 0, sizeof(_BlockRecive));
     memset(CardID, 0, sizeof(CardID));
     cout<<" Sensor2 y Sensor3 = "<< *this->getc_flags_K720()->sensor2_com() << *this->getc_flags_K720()->sensor3_com()<<endl;
@@ -936,7 +1300,7 @@ QString c_FunctionsK720::CrearTarjeta(QString Nombre, QString Apellidos, QString
                                 Check = K720_CommClose(hComPortInside);
                                 cout << "Check ComClose, comprobacion erronea" << Check << endl;
                                 this->flagsComInside->flag_status_com(false);
-                                return false;
+                                return NULL;
                             }
                         }
                         }
@@ -1017,7 +1381,7 @@ QString c_FunctionsK720::CrearTarjeta(QString Nombre, QString Apellidos, QString
                                         Check = K720_CommClose(hComPortInside);
                                         cout << "Check ComClose, comprobacion erronea" << Check << endl;
                                         this->flagsComInside->flag_status_com(false);
-                                        return false;
+                                        return NULL;
                                     }
                                 }
                             }
@@ -1029,7 +1393,7 @@ QString c_FunctionsK720::CrearTarjeta(QString Nombre, QString Apellidos, QString
                     Check = K720_CommClose(hComPortInside);
                     cout << "Check ComClose" << Check << endl;
                     this->flagsComInside->flag_status_com(false);
-                    return false;
+                    return NULL;
 
                 }
             }
@@ -1108,7 +1472,7 @@ QString c_FunctionsK720::CrearTarjeta(QString Nombre, QString Apellidos, QString
                              Check = K720_CommClose(hComPortInside);
                              cout << "Check ComClose, comprobacion erronea" << Check << endl;
                              this->flagsComInside->flag_status_com(false);
-                             return false;
+                             return NULL;
                          }
                      }
                      }
@@ -1188,7 +1552,7 @@ QString c_FunctionsK720::CrearTarjeta(QString Nombre, QString Apellidos, QString
                                      Check = K720_CommClose(hComPortInside);
                                      cout << "Check ComClose, comprobacion erronea" << Check << endl;
                                      this->flagsComInside->flag_status_com(false);
-                                     return false;
+                                     return NULL;
                                  }
                              }
                          }
@@ -1200,7 +1564,7 @@ QString c_FunctionsK720::CrearTarjeta(QString Nombre, QString Apellidos, QString
                  Check = K720_CommClose(hComPortInside);
                  cout << "Check ComClose" << Check << endl;
                  this->flagsComInside->flag_status_com(false);
-                 return false;
+                 return NULL;
 
              }
          }

@@ -484,7 +484,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>22</number>
+     <number>9</number>
     </property>
     <widget class="QWidget" name="V00_Inicio">
      <widget class="QVideoWidget" name="rep" native="true">
@@ -12994,36 +12994,6 @@ color: rgb(0, 84, 99)</string>
        </property>
       </item>
      </widget>
-     <widget class="QCalendarWidget" name="calendarWidget">
-      <property name="geometry">
-       <rect>
-        <x>40</x>
-        <y>40</y>
-        <width>312</width>
-        <height>183</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QDateEdit" name="dateEdit">
-      <property name="geometry">
-       <rect>
-        <x>100</x>
-        <y>290</y>
-        <width>110</width>
-        <height>22</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QDateTimeEdit" name="dateTimeEdit">
-      <property name="geometry">
-       <rect>
-        <x>80</x>
-        <y>380</y>
-        <width>194</width>
-        <height>22</height>
-       </rect>
-      </property>
-     </widget>
      <zorder>pushButton_24</zorder>
      <zorder>toolButton_68</zorder>
      <zorder>LInfoTarjeta_4</zorder>
@@ -13124,9 +13094,6 @@ color: rgb(0, 84, 99)</string>
      <zorder>B04_Back_25</zorder>
      <zorder>SelecHorario</zorder>
      <zorder>BoxSelHorario</zorder>
-     <zorder>calendarWidget</zorder>
-     <zorder>dateEdit</zorder>
-     <zorder>dateTimeEdit</zorder>
     </widget>
     <widget class="QWidget" name="V27EstadoCentral">
      <widget class="QPushButton" name="pushButton_25">

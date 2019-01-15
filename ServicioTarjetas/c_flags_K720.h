@@ -23,7 +23,7 @@ class c_flags_K720
                 void flag_sensor1_com(bool flag);
                 void flag_sensor2_com(bool flag);
                 void flag_sensor3_com(bool flag);
-		void flag_sincronismo_com(TCHAR flag);
+
 		
 	protected:
 		

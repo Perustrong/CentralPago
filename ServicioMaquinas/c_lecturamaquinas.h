@@ -9,8 +9,7 @@
 #include <iostream>
 #include <string>
 #include <QString>
-#include <ServicioEfectivo/c_LogFileEfectivo.h>
-
+#include <ServicioMaquinas/c_LogFileMaquinas.h>
 using namespace std;
 
 class c_lecturamaquinas:public QThread

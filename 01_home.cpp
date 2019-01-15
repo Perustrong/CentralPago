@@ -33,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
        connect(this,SIGNAL(PrinterFunction(string)),CouponPrinterThread,SLOT(onPrinterFunction(string)));
 
        qRegisterMetaType<string>("string");
+       qRegisterMetaType<HANDLE>("HANDLE");
 
        LecturaLavadorasThread = new c_lecturamaquinas(this);
        connect(LecturaLavadorasThread,SIGNAL(LecturaMaquina(string)),this,SLOT(onLecturaLavadora(string)));
@@ -47,11 +48,13 @@ MainWindow::MainWindow(QWidget *parent) :
        Lavadora = new c_Maquinas(this);
        connect(Lavadora,SIGNAL(HandleLavadora(HANDLE)),this,SLOT(onHandleLavadora(HANDLE)));
        connect(this,SIGNAL(ActualizarConfiguracionLav(string)),Lavadora,SLOT(onActualizarConfiguracionLav(string)));
+       connect(Lavadora,SIGNAL(InhabilitarLavadora(unsigned char)),this,SLOT(onInhabilitaLavadora(unsigned char)));
 
 
        Secadora = new c_Maquinas(this);
        connect(Secadora,SIGNAL(HandleSecadora(HANDLE)),this,SLOT(onHandleSecadora(HANDLE)));
        connect(this,SIGNAL(ActualizarConfiguracionSec(string)),Secadora,SLOT(onActualizarConfiguracionSec(string)));
+       connect(Secadora,SIGNAL(InhabilitarSecadora(unsigned char)),this,SLOT(onInhabilitaSecadora(unsigned char)));
 
        connect(&VentanaCrear,SIGNAL(CrearMaquinaAction(string)),this,SLOT(onCrearMaquinaAction(string)));
 
@@ -65,6 +68,17 @@ MainWindow::MainWindow(QWidget *parent) :
        Lavadora->set_numTipoMaquina(1);
        Secadora->set_numTipoMaquina(2);
 
+       Lavadora->HiloActivo = true;
+       Lavadora->AccionHilo = 1;
+       Lavadora->ConectarLav();
+       Sleep(100);
+       Lavadora->start();
+
+       Secadora->HiloActivo = true;
+       Secadora->AccionHilo = 1;
+       Secadora->ConectarSec();
+       Sleep(100);
+       Secadora->start();
 
        // LecturaLavadorasThread->start();
 
@@ -132,11 +146,11 @@ void MainWindow::on_B02_Instrucciones_clicked()
 
 void MainWindow::on_B03_Tocar_clicked()
 {
-        emit PrinterFunction("CL");
+       // emit PrinterFunction("CL");
         ui->stackedWidget->setCurrentIndex(3);
         player->stop();
       //  CouponPrinterThread->start();
-        emit PrinterFunction("Funcion de impresora");
+       // emit PrinterFunction("Funcion de impresora");
 
 
 
@@ -147,46 +161,49 @@ void MainWindow::on_B03_Tocar_clicked()
 
 void MainWindow::on_B04_Home_clicked()
 {
-        ui->stackedWidget->setCurrentIndex(0);
+        ventana0();
         player->play();
 }
 
 void MainWindow::on_B04_Home_2_clicked()
 {
-        ui->stackedWidget->setCurrentIndex(0);
+        ventana0();
         player->play();
 }
 
 void MainWindow::on_B04_Home_3_clicked()
 {
 
-        ui->stackedWidget->setCurrentIndex(0);
+        ventana0();
         player->play();
 
 }
 
 void MainWindow::on_B04_Home_4_clicked()
 {
-         ui->stackedWidget->setCurrentIndex(0);
+         ventana0();
          player->play();
 }
 
 void MainWindow::on_B04_Back_3_clicked()
 {
-         ui->stackedWidget->setCurrentIndex(0);
+         ventana0();
          player->play();
 }
 
 void MainWindow::on_B04_Back_4_clicked()
 {
         ui->stackedWidget->setCurrentIndex(3);
+        Lavadora->HiloActivo = true;
+        Lavadora->AccionHilo = 1;
+        Lavadora->start();
 }
 
 void MainWindow::on_B09_Lavadora01_toggled(bool checked)
 {
    /* if (ui->B09_Lavadora01->isChecked())
        {
-        //ui->B10_Lavadora02->setAttribute(Qt::WA_NoSystemBackground, true);
+        //ui->B10_Lavadora02->setAttribute(Qt::WA_NostemBackground, true);
 
         ui->B10_Lavadora02->setChecked("Off");
 
@@ -222,7 +239,7 @@ void MainWindow::on_B09_Lavadora01_clicked()
     Lavadora->set_CmdNumMaq(0x01);
 
 
-    Lavadora->InfoStatus((unsigned char) Lavadora->get_numMaquina());
+    //Lavadora->InfoStatus((unsigned char) Lavadora->get_numMaquina());
 
 
     ui->intTamaLavSel2->setText(QString("8 KG"));
@@ -420,6 +437,25 @@ void MainWindow::on_B14_Lavadora06_clicked()
     connect(animation, SIGNAL(finished()), this, SLOT(ventana5()));
 }
 
+void MainWindow::ventana0()
+{
+ ui->stackedWidget->setCurrentIndex(0);
+ ActivarHilosTest();
+}
+
+void MainWindow::ActivarHilosTest()
+{
+
+    Lavadora->HiloActivo = true;
+    Lavadora->AccionHilo = 1;
+    if(!Lavadora->isRunning())Lavadora->start();
+
+    Secadora->HiloActivo = true;
+    Secadora->AccionHilo = 1;
+    if(!Secadora->isRunning())Secadora->start();
+
+
+}
 
 void MainWindow::ventana4()
 {
@@ -442,6 +478,8 @@ void MainWindow::ventana5()
  ui->B13_Lavadora05->setGeometry(1250, 560, 250, 250);
  ui->B14_Lavadora06->setGeometry(1550, 560, 250, 250);
 
+ Lavadora->HiloActivo = true;
+ Lavadora->AccionHilo = 2;
  Lavadora->start();
  //emit EstadoPuertaLav();
  //connect(ui->stackedWidget, SIGNAL(currentChanged(int==5)),this,SLOT(onEstadoPuertaLav()));
@@ -480,6 +518,8 @@ void MainWindow::ventana10()
  ui->B13_Secadora5->setGeometry(1250, 560, 250, 250);
  ui->B14_Secadora6->setGeometry(1550, 560, 250, 250);
 
+ Secadora->HiloActivo = true;
+ Secadora->AccionHilo = 2;
  Secadora->start();
 }
 
@@ -573,9 +613,10 @@ void MainWindow::on_B04_Back_clicked()
 void MainWindow::on_B05_Lavar_clicked()
 {
     Lavadora->set_numTipoMaquina(1);
+    Lavadora->HiloActivo = false;
 
     //emit TestEstadosLav();
-    Lavadora->SlotHilo();
+   // Lavadora->SlotHilo();
 
 
 
@@ -616,7 +657,7 @@ void MainWindow::on_B04_Back_6_clicked()
 void MainWindow::on_B15_Adelante_3_clicked()
 {
         ui->stackedWidget->setCurrentIndex(4);
-        Lavadora->terminate();
+        Lavadora->HiloActivo = false;
 }
 
 
@@ -691,7 +732,7 @@ void MainWindow::on_B15_Adelante_4_clicked()
         char AuxEx = Lavadora->get_numExtras();
         AuxEx = (AuxEx+'0');
         EnvioAux+=AuxEx;
-        emit PrinterFunction(EnvioAux);
+        //emit PrinterFunction(EnvioAux);
 
 
         AuxEx = Lavadora->get_numMaquina();
@@ -704,13 +745,13 @@ void MainWindow::on_B15_Adelante_4_clicked()
        // strcat(EnvioAux,AuxEx);
         printf("%x",EnvioAux[3]);
         cout<< "cout EnvioAux"<<EnvioAux<<endl;
-        emit PrinterFunction(EnvioAux);
+       // emit PrinterFunction(EnvioAux);
 
         EnvioAux = "ALINI";
-        emit PrinterFunction(EnvioAux);
+       // emit PrinterFunction(EnvioAux);
 
         EnvioAux = "AI";
-        emit PrinterFunction(EnvioAux);
+        //emit PrinterFunction(EnvioAux);
 
 
 
@@ -1136,8 +1177,8 @@ bool MainWindow::get_extra3(){
 void MainWindow::on_B06_Secar_clicked()
 {
     Secadora->set_numTipoMaquina(2);
-
-    Secadora->SlotHilo();
+    Secadora->HiloActivo = false;
+    //Secadora->SlotHilo();
 
     ventana9();
 
@@ -1374,138 +1415,6 @@ void MainWindow::on_GuardarFormulario_clicked()
     }
 
     EfectivoThread2->start(QThread::HighPriority);
-   /* HANDLE hComPortAux=NULL;
-
-    QString saldo = NULL;
-    QString saldoString =NULL;
-    QString nombre = NULL;
-    QString apellidos = NULL;
-    QString LastID = NULL;
-    QString strCardID = NULL;
-    QString ntarj = NULL;
-    QString ID = NULL;
-
-    BYTE numCardAux = NULL;
-    BYTE numCard[5];
-
-    nombre = ui->NombreValor->text();
-    apellidos = ui->ApellidosValor->text();
-    saldoString = ui->intNuevTarjeta->text();
-    saldo = ui->intNuevTarjeta->text();
-
-   hComPortAux = K720_Dispenser.ConnectCOM();
-
-   if(hComPortAux==0)
-   {
-       cout<<"Error de conexión al puerto del dispensador de tarjetas.";
-   }
-
-   bool dbConectado = BaseDatos.ConectarServidor();
-
-   cout<<"dbConectado = "<<dbConectado<<endl;
-
-   if (dbConectado)
-   {
-       K720_Dispenser.BaseDatos = BaseDatos;
-   }
-
-   LastID=BaseDatos.IDNuevoCliente();
-
-   strCardID = K720_Dispenser.CrearTarjeta(nombre,apellidos,LastID);
-
-   bool NuevoCliente = false;
-
-   NuevoCliente = BaseDatos.NuevoCliente(nombre,apellidos,saldo,strCardID);
-
-   if(NuevoCliente)
-   {
-       cout <<"Cliente creado correctamente"<<endl;
-
-   }
-   else
-   {
-       QMessageBox::critical(this,"Error","Error al crear el nuevo cliente");
-   }
-
-
-
-
-
-
-   ui->stackedWidget->setCurrentIndex(0);
-   float saldofloat = BaseDatos.SaldoCliente(ntarj,ID);
-   cout<<"saldofloat = " <<saldofloat<<endl;*/
-
-  /*  QSqlQuery query(db);
-
-
-    if(db.isOpen())
-    {
-        qDebug() << "La conexion esta establecida";
-    //    query.exec("SELECT * FROM base_datos_cp.clientes");
-   //     query.isActive();
-   //     query.isSelect();
-   //     query.isValid();
-        query.exec("SELECT max(id+1) FROM base_datos_cp.clientes");
-        query.first();
-        LastID = query.value(0).toString();
-
-        qDebug() << query.lastError().text();
-
-       // LastID = query.lastInsertId().toChar().toLatin1();
-        cout<<"Last ID1 = "<<LastID.toStdString()<<endl;
-        qDebug()<<"LastID1" <<LastID<<endl;
-    }
-    else
-    {
-        qDebug() << "La conexion NO esta establecida";
-    }
-    ID = LastID.toStdString();
-    cout<<"Last ID2 = "<<ID<<endl;
-    //qDebug()<<"LastID2" <<ID<<endl;
-
-    QMessageBox::critical(this,"Nombre y Saldo", nombre + apellidos + saldoString);
-
-     hComPortAux = K720_Dispenser.ConnectCOM(PortDispenser);
-     if(hComPortAux==0)
-     {
-         cout<<"Error de conexión al puerto del dispensador de tarjetas.";
-     }
-     else
-     {
-
-         cout<<"Puerto COM del dispensador de tarjetas conectado";
-         strCardID = K720_Dispenser.CrearTarjeta(nombre,apellidos,LastID);
-        // qDebug () << "numero tarjeta aux" << numCardAux;
-      //   numCard = numCardAux;
-      //   qDebug () << "numero tarjeta aux" << numCard;
-
-
-        printf("numCardAux %x",numCardAux);
-        cout <<"Pasa por aqui come bolsas"<<endl;
-        //cout<<"string"<<strCardID;
-         if(db.isOpen())
-         {
-             qDebug() << "La conexion esta establecida";
-             QString insertvalues = "INSERT INTO base_datos_cp.clientes (Nombre, Apellidos, Numero_de_tarjeta, Saldo) VALUES (:nombre, :apellidos, :CardID, :saldoString)";
-
-             query.prepare(insertvalues);
-             query.bindValue(":nombre",nombre);
-             query.bindValue(":apellidos",apellidos);
-             query.bindValue(":saldoString",saldoString);
-             query.bindValue(":CardID",strCardID);
-             query.exec();
-             query.finish();
-             qDebug() << query.lastError().text();
-
-
-         }
-         else
-         {
-             qDebug() << "La conexion NO esta establecida";
-         }
-
-     }*/
 
 
 
@@ -1521,6 +1430,10 @@ void MainWindow::on_B04_Back_10_clicked()
 void MainWindow::on_B04_Back_8_clicked()
 {
     ui->stackedWidget->setCurrentIndex(3);
+
+    Secadora->HiloActivo = true;
+    Secadora->AccionHilo = 1;
+    Secadora->start();
 }
 
 void MainWindow::on_B09_Secadora1_clicked()
@@ -1742,7 +1655,7 @@ void MainWindow::on_B14_Secadora6_clicked()
 void MainWindow::on_B04_Back_13_clicked()
 {
     ui->stackedWidget->setCurrentIndex(9);
-    Secadora->terminate();
+    Secadora->HiloActivo = false;
 }
 
 void MainWindow::on_B15_Adelante_6_clicked()
@@ -1883,13 +1796,13 @@ void MainWindow::on_B15_Adelante_5_clicked()
    AuxEx = (AuxEx+'0');
    EnvioAux+=AuxEx;
 
-   emit PrinterFunction(EnvioAux);
+  // emit PrinterFunction(EnvioAux);
 
    EnvioAux = "ALINI";
-   emit PrinterFunction(EnvioAux);
+   //emit PrinterFunction(EnvioAux);
 
    EnvioAux = "AI";
-   emit PrinterFunction(EnvioAux);
+   //emit PrinterFunction(EnvioAux);
 
 
    switch (Secadora->get_numMaquina()) {
@@ -2103,13 +2016,13 @@ void MainWindow::on_B15_Adelante_5_clicked()
 
 void MainWindow::on_B04_Back_14_clicked()
 {
-    emit PrinterFunction("CL");
+   // emit PrinterFunction("CL");
     ventana7();
 }
 
 void MainWindow::on_B04_Back_15_clicked()
 {
-     emit PrinterFunction("CL");
+     //emit PrinterFunction("CL");
      ui->stackedWidget->setCurrentIndex(12);
 
 }
@@ -2135,7 +2048,7 @@ void MainWindow::onLecturaMoneda(float number)
             BaseDatos.RecargaTarjeta(K720_Dispenser.UltimaID,(RecargaTarjeta*100));
             K720_Dispenser.ExpulsarTarjeta();
             Sleep(2000);
-            ui->stackedWidget->setCurrentIndex(0);
+            ventana0();
             player->play();
             EfectivoThread->Stop();
             EfectivoThread2->Stop();
@@ -2149,7 +2062,7 @@ void MainWindow::onLecturaMoneda(float number)
             BaseDatos.RecargaTarjeta(K720_Dispenser.UltimaID,(RecargaTarjeta*100));
             K720_Dispenser.ExpulsarTarjeta();
             Sleep(2000);
-            ui->stackedWidget->setCurrentIndex(0);
+            ventana0();
             player->play();
             EfectivoThread->Stop();
             EfectivoThread2->Stop();
@@ -2224,7 +2137,7 @@ void MainWindow::onLecturaMoneda(float number)
 
 
             Sleep(2000);
-            ui->stackedWidget->setCurrentIndex(0);
+            ventana0();
             player->play();
             EfectivoThread->Stop();
             EfectivoThread2->Stop();
@@ -2290,7 +2203,7 @@ void MainWindow::onLecturaMoneda(float number)
            }
 
             Sleep(2000);
-            ui->stackedWidget->setCurrentIndex(0);
+            ventana0();
             player->play();
             EfectivoThread->Stop();
             EfectivoThread2->Stop();
@@ -2300,7 +2213,7 @@ void MainWindow::onLecturaMoneda(float number)
     else
     {
 
-
+        cout <<"[c_EfectivoThread] ****************************OnLecturaMoneda - TotalPago:"<<TotalPago<<"number:"<<number<<endl;
         if((TotalPago-number)>0)
         {
             TotalPago = TotalPago - number;
@@ -2310,7 +2223,7 @@ void MainWindow::onLecturaMoneda(float number)
         }
         else if ((TotalPago-number)==0)
         {
-            emit PrinterFunction("PR");
+           // emit PrinterFunction("PR");
 
 
             TotalPago = 0;
@@ -2348,14 +2261,14 @@ void MainWindow::onLecturaMoneda(float number)
 
             }
             Sleep(2000);
-            ui->stackedWidget->setCurrentIndex(0);
+            ventana0();
             player->play();
             EfectivoThread->Stop();
             EfectivoThread2->Stop();
         }
         else if((TotalPago-number)<0)
         {
-            emit PrinterFunction("PR");
+            //emit PrinterFunction("PR");
             cout << "TotalPago< = " << TotalPago<< endl;
             EfectivoThread->SistemaMonedas.DevolucionMonedas(number-TotalPago);
             ui->intEfectivoRestante->setText("Devolución "+QString::number(number-TotalPago));
@@ -2393,7 +2306,7 @@ void MainWindow::onLecturaMoneda(float number)
 
             }
             Sleep(2000);
-            ui->stackedWidget->setCurrentIndex(0);
+            ventana0();
             player->play();
             EfectivoThread->Stop();
             EfectivoThread2->Stop();
@@ -2420,7 +2333,7 @@ void MainWindow::onLecturaBillete(float number)
             BaseDatos.RecargaTarjeta(K720_Dispenser.UltimaID,RecargaTarjeta*100);
             K720_Dispenser.ExpulsarTarjeta();
             Sleep(2000);
-            ui->stackedWidget->setCurrentIndex(0);
+            ventana0();
             player->play();
             EfectivoThread->Stop();
             EfectivoThread2->Stop();
@@ -2434,7 +2347,7 @@ void MainWindow::onLecturaBillete(float number)
             BaseDatos.RecargaTarjeta(K720_Dispenser.UltimaID,RecargaTarjeta*100);
             K720_Dispenser.ExpulsarTarjeta();
             Sleep(2000);
-            ui->stackedWidget->setCurrentIndex(0);
+            ventana0();
             player->play();
             EfectivoThread->Stop();
             EfectivoThread2->Stop();
@@ -2510,7 +2423,7 @@ void MainWindow::onLecturaBillete(float number)
 
 
             Sleep(2000);
-            ui->stackedWidget->setCurrentIndex(0);
+            ventana0();
             player->play();
             EfectivoThread->Stop();
             EfectivoThread2->Stop();
@@ -2576,7 +2489,7 @@ void MainWindow::onLecturaBillete(float number)
            }
 
             Sleep(2000);
-            ui->stackedWidget->setCurrentIndex(0);
+            ventana0();
             player->play();
             EfectivoThread->Stop();
             EfectivoThread2->Stop();
@@ -2598,7 +2511,7 @@ void MainWindow::onLecturaBillete(float number)
         {
 
 
-           emit PrinterFunction("PR");
+           //emit PrinterFunction("PR");
 
             TotalPago = 0;
             cout << "TotalPago= = " << TotalPago<< endl;
@@ -2635,7 +2548,7 @@ void MainWindow::onLecturaBillete(float number)
 
             }
             Sleep(2000);
-            ui->stackedWidget->setCurrentIndex(0);
+            ventana0();
             player->play();
             EfectivoThread->Stop();
             EfectivoThread2->Stop();
@@ -2643,7 +2556,7 @@ void MainWindow::onLecturaBillete(float number)
         else if((TotalPago-number)<0)
         {
 
-            emit PrinterFunction("PR");
+            //emit PrinterFunction("PR");
 
             cout << "TotalPago< = " << TotalPago<< endl;
             EfectivoThread->SistemaMonedas.DevolucionMonedas(number-TotalPago);
@@ -2682,7 +2595,7 @@ void MainWindow::onLecturaBillete(float number)
 
             }
             Sleep(2000);
-            ui->stackedWidget->setCurrentIndex(0);
+            ventana0();
             player->play();
             EfectivoThread->Stop();
             EfectivoThread2->Stop();
@@ -2768,6 +2681,7 @@ void MainWindow::on_PagoTarjeta_2_clicked()
 
     ui->stackedWidget->setCurrentIndex(18);
 
+
     TarjetaThread->start();
 
 
@@ -2803,7 +2717,7 @@ void MainWindow::on_PagoTarjeta_3_clicked()
         if(BaseDatos.NuevoSaldo(auxID,SaldoTarjeta))
         {
             cout << "Actualizado saldo "<< SaldoTarjeta <<endl;
-            ui->stackedWidget->setCurrentIndex(0);
+            ventana0();
             player->play();
             K720_Dispenser.ExpulsarTarjeta();
         }
@@ -2811,7 +2725,7 @@ void MainWindow::on_PagoTarjeta_3_clicked()
         {
             QMessageBox::critical(this, "Error en base de datos","No acutalizado el nuevo saldo");
             cout <<"Saldo error = "<<SaldoTarjeta;
-            ui->stackedWidget->setCurrentIndex(0);
+            ventana0();
             player->play();
             K720_Dispenser.ExpulsarTarjeta();
         }
@@ -2838,14 +2752,14 @@ void MainWindow::onLecturaTarjeta(float number)
         Sleep(100);
         K720_Dispenser.BaseDatos=BaseDatos;
 
-        SaldoTarjeta = K720_Dispenser.LeerTarjeta();
+        SaldoTarjeta = K720_Dispenser.LeerSaldoTarjeta();
 
 
         if(SaldoTarjeta==999)
         {
             ui->textPagoTarjeta->setText("Tarjeta Errónea o tiempo de espera superado");
             Sleep(3000);
-            ui->stackedWidget->setCurrentIndex(0);
+            ventana0();
             player->play();
             K720_Dispenser.DisableMouth();
         }
@@ -2874,14 +2788,14 @@ void MainWindow::onLecturaTarjeta(float number)
         Sleep(1000);
         K720_Dispenser.BaseDatos=BaseDatos;
 
-        SaldoTarjeta = K720_Dispenser.LeerTarjeta();
+        SaldoTarjeta = K720_Dispenser.LeerSaldoTarjeta();
 
 
         if(SaldoTarjeta==999)
         {
             ui->textPagoTarjeta->setText("Tarjeta Errónea o tiempo de espera superado");
             Sleep(3000);
-            ui->stackedWidget->setCurrentIndex(0);
+            ventana0();
             player->play();
             K720_Dispenser.DisableMouth();
         }
@@ -2895,6 +2809,34 @@ void MainWindow::onLecturaTarjeta(float number)
             K720_Dispenser.DisableMouth();
 
 
+
+        }
+
+    }
+    else if (number==53)
+    {
+
+        QString IDDataBase;
+        IDDataBase = K720_Dispenser.LeerIDTarjeta();
+        cout<<"Porque ostias no has parado el procesador!!!"<<endl;
+        QSqlQuery Info = BaseDatos.ConsultaUsuario(IDDataBase);
+        if(Info.lastError().isValid())
+        {
+            cout << "Error el leer la tabla por ID"<<endl;
+
+            //Insertar Error en el Log;
+
+
+
+
+        }
+        else
+        {
+            cout << "Pasado por el envío a pantalla del identificador de cliente"<<endl;
+            QSqlQueryModel SqlModel;
+            SqlModel.setQuery(Info);
+
+            ui->TablaIdentTarjeta->setModel(&SqlModel);
 
         }
 
@@ -3062,11 +3004,20 @@ void MainWindow::on_B07_TarifasPromo_clicked()
 void MainWindow::on_IdentificacionTarjeta_clicked()
 {
     ui->stackedWidget->setCurrentIndex(23);
+    Lavadora->terminate();
+    Secadora->terminate();
+    TarjetaThread->Function=53;
+    TarjetaThread->start();
+    
+
+    
 }
 
 void MainWindow::on_GestionTarjetas_clicked()
 {
     ui->stackedWidget->setCurrentIndex(22);
+    
+    
 }
 
 void MainWindow::on_TarjetaAdmin_clicked()
@@ -3087,6 +3038,9 @@ void MainWindow::on_B04_Back_20_clicked()
 void MainWindow::on_B04_Back_22_clicked()
 {
     ui->stackedWidget->setCurrentIndex(21);
+    K720_Dispenser.ExpulsarTarjeta();
+    Lavadora->start();
+    Secadora->start();
 }
 
 void MainWindow::on_B04_Back_23_clicked()
@@ -3109,6 +3063,9 @@ void MainWindow::on_BtnConfigMaq_clicked()
 void MainWindow::on_B04_Back_27_clicked()
 {
      ui->stackedWidget->setCurrentIndex(30);
+     Lavadora->HiloActivo = true;
+     Lavadora->AccionHilo = 1;
+     Lavadora->start();
 }
 
 void MainWindow::on_NuevoCliente_2_clicked()
@@ -3124,6 +3081,7 @@ void MainWindow::on_B04_Back_28_clicked()
 void MainWindow::on_BtnLavadora_clicked()
 {
     ui->stackedWidget->setCurrentIndex(29);
+    Lavadora->HiloActivo = false;
 }
 
 void MainWindow::on_BtnActualizar_clicked()
@@ -3190,7 +3148,8 @@ void MainWindow::onLecturaLavadora(string buffer)
         //AuxMensaje[i]=LecturaLavadorasThread->BufferAuxiliar[i];
         printf("Llegada emision. Byte %d = %x. /n %x",i,AuxMensaje[i],buffer[i]);
     }
-
+    int Respondido = (int)AuxMensaje[0];
+    Lavadora->RespuestaLav[Respondido]=true;
     cout << "Pasado Mensaje"<<endl;
 
     switch (AuxMensaje[1]) {
@@ -3323,7 +3282,7 @@ void MainWindow::onLecturaLavadora(string buffer)
             if(ui->stackedWidget->currentIndex()==5)
             {
                 ui->stackedWidget->setCurrentIndex(6);
-                Lavadora->terminate();
+                Lavadora->HiloActivo=false;
             }
         }
 
@@ -3807,7 +3766,12 @@ void MainWindow::onLecturaSecadora(string buffer)
         printf("Llegada emision. Byte %d = %x. /n %x",i,AuxMensaje[i],buffer[i]);
     }
 
-    cout << "Pasado Mensaje"<<endl;
+    cout << "Pasado MensajeSecadora"<<endl;
+
+    int Respondido = (int)AuxMensaje[0];
+    Secadora->RespuestaSec[Respondido]=true;
+    cout << "Pasado Mensaje Secadora"<<endl;
+
 
     switch (AuxMensaje[1])
     {
@@ -3904,7 +3868,7 @@ void MainWindow::onLecturaSecadora(string buffer)
         }
         else if (Alarma == 0 && TiempoRestante == 0 && ProgramaEjeucion == 0 )
         {
-            cout<< "Lavadora disponible"<<endl;
+            cout<< "Secadora disponible"<<endl;
 
             switch (NumMaq) {
             case 0x01:
@@ -3948,7 +3912,7 @@ void MainWindow::onLecturaSecadora(string buffer)
             if(ui->stackedWidget->currentIndex()==10)
             {
                 ui->stackedWidget->setCurrentIndex(11);
-                Secadora->terminate();
+                Secadora->HiloActivo=false;
             }
         }
 
@@ -4084,7 +4048,7 @@ void MainWindow::onHandleLavadora(HANDLE hComPortLav)
 void MainWindow::onHandleSecadora(HANDLE hComPortSec)
 {
    // emit ActualizacionHandleLecturaSecadoras(hComPortSec);
-    cout<<"hcomPort Lavadora"<<hComPortSec<<endl;
+    cout<<"hcomPort Secadora"<<hComPortSec<<endl;
     emit ActualizacionHandleLecturaSecadoras(hComPortSec);
     if(LecturaSecadorasThread->isRunning())
     {
@@ -5299,11 +5263,15 @@ void MainWindow::on_BtnGuardar_clicked()
 void MainWindow::on_BtnSecadora_clicked()
 {
     ui->stackedWidget->setCurrentIndex(31);
+    Secadora->HiloActivo = false;
 }
 
 void MainWindow::on_B04_Back_30_clicked()
 {
     ui->stackedWidget->setCurrentIndex(30);
+    Secadora->HiloActivo = true;
+    Secadora->AccionHilo = 1;
+    Secadora->start();
 }
 
 void MainWindow::on_BtnActualizar_2_clicked()
@@ -5416,4 +5384,71 @@ void MainWindow::on_BtnGuardar_2_clicked()
 void MainWindow::on_GestionTarjetas_2_clicked()
 {
     ui->stackedWidget->setCurrentIndex(32);
+}
+
+void MainWindow::onInhabilitaLavadora(unsigned char Lav)
+{
+    switch (Lav)
+    {
+    case 0x01:
+    {
+        ui->B09_Lavadora01->setIcon(QIcon(":/Iconos/material/iconos/icono_lavar_tamañokg01.png"));
+        break;
+    }
+    case 0x02:
+    {
+        ui->B10_Lavadora02->setIcon(QIcon(":/Iconos/material/iconos/icono_lavar_tamañokg01.png"));
+        break;
+    }
+    case 0x03:
+    {
+        ui->B11_Lavadora03->setIcon(QIcon(":/Iconos/material/iconos/icono_lavar_tamañokg02.png"));
+        break;
+    }
+    case 0x04:
+    {
+        ui->B12_Lavadora04->setIcon(QIcon(":/Iconos/material/iconos/icono_lavar_tamañokg02.png"));
+        break;
+    }
+    case 0x05:
+    {
+        ui->B13_Lavadora05->setIcon(QIcon(":/Iconos/material/iconos/icono_lavar_tamañokg03.png"));
+        break;
+    }
+    case 0x06:
+    {
+        ui->B14_Lavadora06->setIcon(QIcon(":/Iconos/material/iconos/icono_lavar_tamañokg03.png"));
+        break;
+    }
+
+    }
+}
+
+void MainWindow::onInhabilitaSecadora(unsigned char Sec)
+{
+    switch (Sec)
+    {
+    case 0x01:
+        ui->B09_Secadora1->setIcon(QIcon(":/Iconos/material/iconos/icono_secadoratamañokg00.png"));
+        //ui->B09_Lavadora01->set
+
+        cout<<"Pasado por el cambio de icono del primer botón"<<endl;
+        break;
+    case 0x02:
+        ui->B10_Secadora2->setIcon(QIcon(":/Iconos/material/iconos/icono_secadoratamañokg00.png"));
+        break;
+    case 0x03:
+        ui->B11_Secadora3->setIcon(QIcon(":/Iconos/material/iconos/icono_secadoratamañokg01.png"));
+        break;
+    case 0x04:
+        ui->B12_Secadora4->setIcon(QIcon(":/Iconos/material/iconos/icono_secadoratamañokg01.png"));
+        break;
+    case 0x05:
+        ui->B13_Secadora5->setIcon(QIcon(":/Iconos/material/iconos/icono_secadoratamañokg02.png"));
+        break;
+    case 0x06:
+        ui->B14_Secadora6->setIcon(QIcon(":/Iconos/material/iconos/icono_secadoratamañokg02.png"));
+        break;
+
+    }
 }

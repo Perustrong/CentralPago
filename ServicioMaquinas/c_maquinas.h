@@ -61,8 +61,7 @@ public:
                    unsigned char TempEntrada, unsigned char VelRotacion, unsigned char AccionMec, unsigned char TiempoEnfri);
     bool SendCmd(unsigned char *Cmd);
     void InfoStatus(unsigned char Maquina);
-    unsigned char* ReadCmd();
-    unsigned char InterpretaMensaje(unsigned char Cmd);
+    //unsigned char InterpretaMensaje(unsigned char Cmd);
     unsigned char CalculaCRC(unsigned char* Cmd);
     void ActualizarEstados();
 
@@ -95,12 +94,13 @@ public:
     void set_CmdModoCentrifugadoExtra(unsigned char);
     void set_CmdTiempoCentrifugadoExtra(unsigned char);
 
-    void SlotHilo();
+    void MaqStatus();
+
 
 private slots:
     void onActualizarConfiguracionLav(string);
     void onActualizarConfiguracionSec(string);
-    void MaqStatus();
+
 
 
 
@@ -108,6 +108,8 @@ signals:
 
     void HandleLavadora(HANDLE);
     void HandleSecadora(HANDLE);
+    void InhabilitarLavadora(unsigned char);
+    void InhabilitarSecadora(unsigned char);
 
 
 
@@ -156,6 +158,11 @@ public:
          */
     int numTiempoExtra = 0;
     int numExtras = 0;
+    bool HiloActivo = false;
+
+    int AccionHilo = 0;
+    bool RespuestaLav[7];
+    bool RespuestaSec[7];
         /* LAVADORAS
          * 0 -> No Extra
          * 1 -> Extra 1

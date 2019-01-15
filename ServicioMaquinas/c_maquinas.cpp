@@ -31,11 +31,25 @@ c_Maquinas::c_Maquinas(QObject *parent) //: QObject()
 
 void c_Maquinas::run()
 {
-    while (true)
+    while (HiloActivo==true)
     {
+        switch(AccionHilo)
+        {
+        case 1:
+        {
+            MaqStatus();
+            Sleep(1500);
+            break;
+        }
+        case 2:
+        {
+            InfoStatus(numTipoMaquina);
+            Sleep(500);
+            break;
+        }
+        }
 
-        InfoStatus(numTipoMaquina);
-        Sleep(500);
+
 
 
     }
@@ -565,7 +579,7 @@ HANDLE c_Maquinas::ConectarLav()
                       NULL);
     if (hComPortLav == INVALID_HANDLE_VALUE)
     {    // no se pudo abrir el puerto COM3:
-      cout<<"No se pudo abrir el puerto ."<<endl;
+      cout<<"No se pudo abrir el puerto Lavadora."<<endl;
       return NULL;
 
     }
@@ -577,6 +591,7 @@ HANDLE c_Maquinas::ConectarLav()
     }
 
     SetCommState(hComPortLav, &dcbComLav);
+    emit HandleLavadora(hComPortLav);
     return hComPortLav;
 }
 
@@ -601,13 +616,14 @@ HANDLE c_Maquinas::ConectarSec()
                       NULL);
     if (hComPortSec == INVALID_HANDLE_VALUE)
     {    // no se pudo abrir el puerto COM3:
-      cout<<"No se pudo abrir el puerto ."<<endl;
+      cout<<"No se pudo abrir el puerto Secadora."<<endl;
       return NULL;
     }
     else
     {
         cout<<"En toería conectado";
         cout<<"hComPort conectar "<< hComPortSec<<endl;
+        emit (HandleSecadora(hComPortSec));
 
     }
 
@@ -656,7 +672,7 @@ bool c_Maquinas::SendCmd(unsigned char* Cmd)
         if(i == 2)
         {
             ComandoEnvio[i]=CmdNumMaq;
-            printf("Byte envio a sendcmd = %x",Cmd[i]);
+            printf("Byte envio a sendcmd = %x",ComandoEnvio[i]);
         }
         else
         {
@@ -698,6 +714,7 @@ bool c_Maquinas::SendCmd(unsigned char* Cmd)
     {
         hComPortLav = ConectarLav();
         hComPort = hComPortLav;
+        cout<<"ConectandoLavadora"<<endl;
         emit HandleLavadora(hComPort);
     }
     else if(numTipoMaquina == 2 && hComPortSec == 0)
@@ -876,7 +893,7 @@ void c_Maquinas::InfoStatus(unsigned char Maquina)
 
 }
 
-void c_Maquinas::SlotHilo()
+/*void c_Maquinas::SlotHilo()
 {
     moveToThread(&Hilo);
     qRegisterMetaType<HANDLE>("HANDLE");
@@ -887,7 +904,7 @@ void c_Maquinas::SlotHilo()
     Hilo.start();
 
 
-}
+}*/
 
 void c_Maquinas::MaqStatus()
 {
@@ -899,73 +916,127 @@ void c_Maquinas::MaqStatus()
         CmdNumMaq = 0x01;
         bool enviado = SendCmd(CmdReadStatusLav);
         if(enviado ==false)cout<<"Comando de lectura info no se ha enviado correctamente"<<endl;
-        Sleep(100);
+        else RespuestaLav[1]=false;
+        Sleep(500);
+        if(RespuestaLav[1]==false)
+        {
+            emit InhabilitarLavadora(0x01);
+        }
         CmdNumMaq = 0x02;
         enviado = SendCmd(CmdReadStatusLav);
         if(enviado ==false)cout<<"Comando de lectura info no se ha enviado correctamente"<<endl;
-        Sleep(100);
+        else RespuestaLav[2]=false;
+        Sleep(500);
+        if(RespuestaLav[2]==false)
+        {
+            emit InhabilitarLavadora(0x02);
+        }
         CmdNumMaq = 0x03;
         enviado = SendCmd(CmdReadStatusLav);
         if(enviado ==false)cout<<"Comando de lectura info no se ha enviado correctamente"<<endl;
-        Sleep(100);
+        else RespuestaLav[3]=false;
+        Sleep(500);
+        if(RespuestaLav[3]==false)
+        {
+            emit InhabilitarLavadora(0x03);
+        }
         CmdNumMaq = 0x04;
         enviado = SendCmd(CmdReadStatusLav);
         if(enviado ==false)cout<<"Comando de lectura info no se ha enviado correctamente"<<endl;
-        Sleep(100);
+        else RespuestaLav[4]=false;
+        Sleep(500);
+        if(RespuestaLav[4]==false)
+        {
+            emit InhabilitarLavadora(0x04);
+        }
         CmdNumMaq = 0x05;
         enviado = SendCmd(CmdReadStatusLav);
         if(enviado ==false)cout<<"Comando de lectura info no se ha enviado correctamente"<<endl;
-        Sleep(100);
+        else RespuestaLav[5]=false;
+        Sleep(500);
+        if(RespuestaLav[5]==false)
+        {
+            emit InhabilitarLavadora(0x05);
+        }
         CmdNumMaq = 0x06;
         enviado = SendCmd(CmdReadStatusLav);
         if(enviado ==false)cout<<"Comando de lectura info no se ha enviado correctamente"<<endl;
-        Sleep(100);
+        else RespuestaLav[6]=false;
+        Sleep(500);
+        if(RespuestaLav[6]==false)
+        {
+            emit InhabilitarLavadora(0x06);
+        }
 
 
     }
     else if(numTipoMaquina==2)
     {
+        cout<<"Envio Hilo Secadora"<<endl;
         CmdNumMaq = 0x01;
         bool enviado = SendCmd(CmdReadStatusSec);
         if(enviado ==false)cout<<"Comando de lectura info no se ha enviado correctamente"<<endl;
-        Sleep(100);
+        else RespuestaSec[1]=false;
+        Sleep(300);
+        if(RespuestaSec[1]==false)
+        {
+            emit InhabilitarSecadora(0x01);
+        }
         CmdNumMaq = 0x02;
         enviado = SendCmd(CmdReadStatusSec);
         if(enviado ==false)cout<<"Comando de lectura info no se ha enviado correctamente"<<endl;
-        Sleep(100);
+        else RespuestaSec[2]=false;
+        Sleep(300);
+        if(RespuestaSec[2]==false)
+        {
+            emit InhabilitarSecadora(0x02);
+        }
         CmdNumMaq = 0x03;
         enviado = SendCmd(CmdReadStatusSec);
         if(enviado ==false)cout<<"Comando de lectura info no se ha enviado correctamente"<<endl;
-        Sleep(100);
+        else RespuestaSec[6]=false;
+        Sleep(300);
+        if(RespuestaSec[6]==false)
+        {
+            emit InhabilitarSecadora(0x03);
+        }
         CmdNumMaq = 0x04;
         enviado = SendCmd(CmdReadStatusSec);
         if(enviado ==false)cout<<"Comando de lectura info no se ha enviado correctamente"<<endl;
-        Sleep(100);
+        else RespuestaSec[4]=false;
+        Sleep(300);
+        if(RespuestaSec[4]==false)
+        {
+            emit InhabilitarSecadora(0x04);
+        }
         CmdNumMaq = 0x05;
         enviado = SendCmd(CmdReadStatusSec);
         if(enviado ==false)cout<<"Comando de lectura info no se ha enviado correctamente"<<endl;
-        Sleep(100);
+        else RespuestaSec[5]=false;
+        Sleep(300);
+        if(RespuestaSec[5]==false)
+        {
+            emit InhabilitarSecadora(0x05);
+        }
         CmdNumMaq = 0x06;
         enviado = SendCmd(CmdReadStatusSec);
         if(enviado ==false)cout<<"Comando de lectura info no se ha enviado correctamente"<<endl;
-        Sleep(100);
+        else RespuestaSec[6]=false;
+        Sleep(300);
+        if(RespuestaSec[6]==false)
+        {
+            emit InhabilitarSecadora(0x06);
+        }
 
     }
 
 
-    Hilo.terminate();
-}
-
-
-
-unsigned char* c_Maquinas::ReadCmd()
-{
-
-
-
-
 
 }
+
+
+
+
 
 void c_Maquinas::ActualizarEstados()
 {
@@ -1050,6 +1121,7 @@ void c_Maquinas::onActualizarConfiguracionLav(string Comando)
 
         SendCmd(CmdReadPhaseLav);
         Sleep(300);
+
     }
 
 }

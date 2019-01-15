@@ -26,10 +26,11 @@ void c_LecturaBilleteThread::run()
     while (true)
     {
 
-        if (hComPort == 0)
+        if (hComPort == 0)// Espera a que se actualice hComPort
         {
            // cout<<"hComPort Hilo Lectura"<< hComPort<<endl;
           //  Sleep(100);
+
 
         }
         else
@@ -81,14 +82,14 @@ float c_LecturaBilleteThread::InterpretaMensaje(unsigned char MensajeAux[])
              //   cout<< "Billete seleccionado 10"<<endl;
                 float aux = 1000;
                 return aux;
-                return aux;
+
             }
             if(MensajeAux[5]==BILLETE20)
             {
               //  cout<< "Billete seleccionado 20"<<endl;
                 float aux = 2000;
                 return aux;
-                return aux;
+
             }
 
         }
